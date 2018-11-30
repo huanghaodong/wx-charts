@@ -669,39 +669,46 @@ function getDataPoints(data, minRange, maxRange, xAxisPoints, eachSpacing, opts,
 }
 
 function getYAxisTextList(series, opts, config) {
-    var data = dataCombine(series);
-    // remove null from data
-    data = data.filter(function (item) {
-        return item !== null;
-    });
-    var minData = Math.min.apply(this, data);
-    var maxData = Math.max.apply(this, data);
-    if (typeof opts.yAxis.min === 'number') {
-        minData = Math.min(opts.yAxis.min, minData);
-    }
-    if (typeof opts.yAxis.max === 'number') {
-        maxData = Math.max(opts.yAxis.max, maxData);
-    }
+  var data = dataCombine(series);
+  // remove null from data
+  data = data.filter(function (item) {
+    return item !== null;
+  });
+  var minData = Math.min.apply(this, data);
+  var maxData = Math.max.apply(this, data);
+  if (typeof opts.yAxis.min === 'number') {
+    minData = Math.min(opts.yAxis.min, minData);
+  }
+  if (typeof opts.yAxis.max === 'number') {
+    maxData = Math.max(opts.yAxis.max, maxData);
+  }
 
-    // fix issue https://github.com/xiaolin3303/wx-charts/issues/9
-    if (minData === maxData) {
-        var rangeSpan = maxData || 1;
-        minData -= rangeSpan;
-        maxData += rangeSpan;
-    }
+  // fix issue https://github.com/xiaolin3303/wx-charts/issues/9
+  if (minData === maxData && maxData != 0) {
+    var rangeSpan = maxData || 1;
+    minData -= rangeSpan;
+    maxData += rangeSpan;
+  }else if( minData == 0 && maxData == 0 ){
+    maxData = 1;
+    minData = 0;
+  }
 
-    var dataRange = getDataRange(minData, maxData);
-    var minRange = dataRange.minRange;
-    var maxRange = dataRange.maxRange;
+  var dataRange = getDataRange(minData, maxData);
+  var minRange = dataRange.minRange;
+  var maxRange = dataRange.maxRange;
+  //Y轴整数化
+  while( maxRange % config.yAxisSplit !== 0){
+    maxRange++;
+  }
+  var range = [];
+  var eachRange = (maxRange - minRange) / config.yAxisSplit;
 
-    var range = [];
-    var eachRange = (maxRange - minRange) / config.yAxisSplit;
-
-    for (var i = 0; i <= config.yAxisSplit; i++) {
-        range.push(minRange + eachRange * i);
-    }
-    return range.reverse();
+  for (var i = 0; i <= config.yAxisSplit; i++) {
+    range.push(minRange + eachRange * i);
+  }
+  return range.reverse();
 }
+
 
 function calYAxisData(series, opts, config) {
 
